@@ -2,36 +2,11 @@ provider "aws" {
     region = var.region
 }
 
+### VPC Setup
+
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
 }
-
-
-resource "aws_default_security_group" "default" {
-  vpc_id = aws_vpc.main.id
-
-  ingress {
-    from_port = 22
-    to_port   = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port = 3128
-    to_port   = 3128
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
 
 # Create an internet gateway to give our subnet access to the outside world
 resource "aws_internet_gateway" "default" {
@@ -82,11 +57,58 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private.id
 }
 
+### Instance Setup
 
+resource "aws_default_security_group" "default" {
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port = 22
+    to_port   = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "public" {
+  name        = "sg-public-squid"
+  description = "Security Group for publicly-accessible instances"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port = 22
+    to_port   = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 3128
+    to_port   = 3128
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 resource "aws_instance" "proxy" {
 
     instance_type = "t3.micro"
     ami = var.amis[var.region]
+
+    vpc_security_group_ids = [aws_security_group.public.id]
 
     subnet_id = aws_subnet.public.id
 
