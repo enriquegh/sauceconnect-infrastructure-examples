@@ -1,5 +1,5 @@
 provider "aws" {
-    region = var.region
+  region = var.region
 }
 
 ### VPC Setup
@@ -14,17 +14,17 @@ resource "aws_internet_gateway" "default" {
 }
 
 resource "aws_route_table" "public" {
-    vpc_id = aws_vpc.main.id
-    route {
-        cidr_block = "0.0.0.0/0"
-        gateway_id = aws_internet_gateway.default.id
-    }
+  vpc_id = aws_vpc.main.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.default.id
+  }
 }
 
 
 resource "aws_subnet" "public" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = "10.0.0.0/24"
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.0.0/24"
   map_public_ip_on_launch = true
 
   tags = {
@@ -39,7 +39,7 @@ resource "aws_route_table_association" "public" {
 
 
 resource "aws_route_table" "private" {
-    vpc_id = aws_vpc.main.id
+  vpc_id = aws_vpc.main.id
 
 }
 
@@ -63,8 +63,8 @@ resource "aws_default_security_group" "default" {
   vpc_id = aws_vpc.main.id
 
   ingress {
-    from_port = 22
-    to_port   = 22
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["10.0.0.0/16"]
   }
@@ -80,18 +80,18 @@ resource "aws_default_security_group" "default" {
 resource "aws_security_group" "public" {
   name        = "public-squid"
   description = "Security Group for publicly-accessible instances"
-  vpc_id = aws_vpc.main.id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port = 22
-    to_port   = 22
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port = 3128
-    to_port   = 3128
+    from_port   = 3128
+    to_port     = 3128
     protocol    = "tcp"
     cidr_blocks = ["10.0.0.0/16"]
   }
@@ -105,26 +105,26 @@ resource "aws_security_group" "public" {
 }
 resource "aws_instance" "proxy" {
 
-    instance_type = "t3.micro"
-    ami = var.amis[var.region]
+  instance_type = "t3.micro"
+  ami           = var.amis[var.region]
 
-    vpc_security_group_ids = [aws_security_group.public.id]
+  vpc_security_group_ids = [aws_security_group.public.id]
 
-    subnet_id = aws_subnet.public.id
+  subnet_id = aws_subnet.public.id
 
-    key_name = var.key_name
+  key_name = var.key_name
 
-    user_data = file("./scripts/install-squid.sh")
+  user_data = file("./scripts/install-squid.sh")
 
 }
 
 resource "aws_instance" "sc_app" {
 
-    instance_type = "t3.micro"
-    ami = var.amis[var.region]
+  instance_type = "t3.micro"
+  ami           = var.amis[var.region]
 
-    subnet_id = aws_subnet.private.id
+  subnet_id = aws_subnet.private.id
 
-    key_name = var.key_name
+  key_name = var.key_name
 
 }
