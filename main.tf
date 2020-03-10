@@ -78,7 +78,7 @@ resource "aws_default_security_group" "default" {
 }
 
 resource "aws_security_group" "public" {
-  name        = "sg-public-squid"
+  name        = "public-squid"
   description = "Security Group for publicly-accessible instances"
   vpc_id = aws_vpc.main.id
 
