@@ -85,7 +85,7 @@ resource "aws_route_table_association" "private" {
 
 resource "aws_instance" "proxy" {
 
-    instance_type = "t2.micro"
+    instance_type = "t3.micro"
     ami = var.amis[var.region]
 
     subnet_id = aws_subnet.public.id
