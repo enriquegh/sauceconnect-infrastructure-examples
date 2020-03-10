@@ -114,6 +114,8 @@ resource "aws_instance" "proxy" {
 
     key_name = var.key_name
 
+    user_data = file("./scripts/install-squid.sh")
+
 }
 
 resource "aws_instance" "sc_app" {
