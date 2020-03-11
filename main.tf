@@ -108,6 +108,14 @@ resource "aws_instance" "proxy" {
   instance_type = "t3.micro"
   ami           = var.amis[var.region]
 
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    host        = self.public_ip
+    private_key = file(var.key_path)
+
+  }
+
   vpc_security_group_ids = [aws_security_group.public.id]
 
   subnet_id = aws_subnet.public.id
@@ -115,6 +123,19 @@ resource "aws_instance" "proxy" {
   key_name = var.key_name
 
   user_data = file("./scripts/install-squid.sh")
+
+  provisioner "file" {
+    source      = "./squid.conf"
+    destination = "/tmp/squid.conf"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo systemctl stop squid",
+      "sudo cp /tmp/squid.conf /etc/squid/squid.conf",
+      "sudo systemctl start squid"
+    ]
+  }
 
 }
 

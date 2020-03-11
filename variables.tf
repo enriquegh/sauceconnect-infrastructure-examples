@@ -13,3 +13,7 @@ variable "amis" {
 variable "key_name" {
   description = "Name of the SSH keypair to use in AWS."
 }
+
+variable "key_path" {
+  description = "Path to where key is saved in machine."
+}
