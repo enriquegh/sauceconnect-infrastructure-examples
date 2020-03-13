@@ -131,9 +131,11 @@ resource "aws_instance" "proxy" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo systemctl stop squid",
+      "sleep 30",
+      "sudo apt-get install -y squid | tee /tmp/squid.log",
+      "sleep 30",
       "sudo cp /tmp/squid.conf /etc/squid/squid.conf",
-      "sudo systemctl start squid"
+      "sudo systemctl restart squid"
     ]
   }
 
