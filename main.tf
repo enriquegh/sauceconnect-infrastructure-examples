@@ -122,7 +122,7 @@ resource "aws_instance" "proxy" {
 
   key_name = var.key_name
 
-  user_data = file("./scripts/install-squid.sh")
+  user_data = file("./scripts/update.sh")
 
   provisioner "file" {
     source      = "./squid.conf"
